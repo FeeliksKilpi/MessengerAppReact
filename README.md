@@ -1,6 +1,6 @@
-# Getting Started with Create React App
+# Messaging App client
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Very Jodel inspired messaging app client made with ReactJS. Includes functionality like, Channels, up and downvoting messages, nice UI inspired by messaging app Jodel. To be used with msgServer, Java SpringBoot server application for this client. Look it up from my repositories.
 
 ## Available Scripts
 

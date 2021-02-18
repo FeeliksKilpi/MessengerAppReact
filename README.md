@@ -2,6 +2,8 @@
 
 Very Jodel inspired messaging app client made with ReactJS. Includes functionality like, Channels, up and downvoting messages, nice UI inspired by messaging app Jodel. To be used with msgServer, Java SpringBoot server application for this client. Look it up from my repositories.
 
+## Very earlt prototype of what the UI looks like atm
+![Prototype screenshot](./screenshots/Prototype.png)
 ## Available Scripts
 
 In the project directory, you can run:

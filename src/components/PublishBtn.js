@@ -1,19 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function PublishBtn() {
     const [write, setWrite] = useState(false);
-    const [msgObj, setMsgObj] = useState({
-            messageText: '',
-            messageColor: 'green',
-            messageChannel:  {
-                channelName: '',
-                channelDesc: ''
-            },
-            messageHashtag: '',
-            messageLocation: 'Helsinki',
-            messageLikes: 0
-    });
     const [channels, setChannels] = useState([]);
+
+    // Message Object proterties
+    const [selChannelId, setChanId] = useState(1);
+    const [text, setText] = useState('');
+    const [ht, setHt] = useState('#');
+    const [loc, setLoc] = useState('Helsinki');
+    const [color, setColor] = useState('#f26d50');
+
+    async function fetchChannels() {
+        const response = await fetch('http://localhost:8080/channels');
+        const json = await response.json();
+        setChannels(json);
+    }
     
     const handleWrite = () => {
         setWrite(true);
@@ -23,36 +25,76 @@ function PublishBtn() {
     }
 
     const printObj = () => {
-        console.log(msgObj);
+        console.log(loc, text, ht, selChannelId, color);
     }
-    const changeValues = (val) => {
-        setMsgObj({
-            ...msgObj,
-            [val.target.name]: val.target.value
-        });
+
+    const createMsgObj = () => {
+        const msg = {
+            'messageText': text,
+            'messageColor': color,
+            'messageHashtag': ht,
+            'messageLocation': loc,
+            'messageLikes': 0,
+            'messageChannel': {
+                'channelId': selChannelId
+            }
+        }
+        return msg;
     }
 
     const clearValues = () => {
-        setMsgObj({
-            messageText: '',
-            messageColor: 'green',
-            messageChannel:  {
-                channelName: '',
-                channelDesc: ''
-            },
-            messageHashtag: '',
-            messageLocation: 'Helsinki',
-            messageLikes: 0
-        });
+        setChanId(1);
+        setText('');
+        setHt('#');
+        setLoc('Helsinki');
+        setColor('#f26d50');
     }
 
     const postMessage = () => {
+        const msgObj = createMsgObj();
         fetch('http://localhost:8080/publish', {
         method: 'POST',
         headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
-        body: JSON.stringify(msgObj)
+        body: JSON.stringify(msgObj),
         });
         console.log("Message posted!");
+    }
+
+    useEffect(() => {fetchChannels()}, []);
+
+    const styles = 
+    {
+        hashtag: {
+            width: 200,
+            fontSize: 24,
+            borderRadius: 50,
+            padding: 10
+        },
+        text: {
+            height: 100,
+            width: 300,
+            borderRadius: 50,
+            padding: 10,
+            fontSize: 20
+        },
+        select: {
+            fontSize: 20,
+            width: 200,
+            margin: 5
+        },
+        btn: {
+            fontSize: 24,
+            width: 200,
+            height: 40,
+            margin: 5,
+            padding: 5,
+            borderRadius: 30,
+            backgroundColor: '#f26d50',
+            color: '#fff'
+        },
+        header: {
+            fontSize: 20
+        }
     }
 
 
@@ -60,30 +102,48 @@ function PublishBtn() {
 
     if (write === true) {
         return(
-            <div style={{height: 400, backgroundColor: "#f26d50", textAlign: 'center'}}>
-                <h1>Kirjoita</h1>
-                <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
-                    <p>Kanava:</p>
-                    <select name='messageChannel' value={msgObj.messageChannel.channelName} onChange={changeValues} style={{display: 'flex', width: 150}}>
-                        <option value='@Main'>@Main</option>
-                        <option value='@Opiskelu'>@opiskelu</option>
-                        <option value='@Menot'>@menot</option>
-                        <option value='@Ruoka'>@ruoka</option>
+            <div style={{backgroundColor: "#f26d50", textAlign: 'center', display:'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column'}}>
+                <h1>Publish Message</h1>
+                <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor:'orange', padding: 30, borderRadius: 80}}>
+                    <p style={styles.header}>Channel:</p>
+                    <select name='messageChannel' value={selChannelId} onChange={(e) => setChanId(e.target.value)} style={styles.select}>
+                    {channels.map(chan =>
+                       <option 
+                       key={chan.channelId} 
+                       value={chan.channelId}
+                       >{chan.channelName}</option> 
+                    )}
                     </select>
-                    <p>Teksti:</p>
-                    <input name='messageText' value={msgObj.messageText}
-                    onChange={changeValues}
-                    style={{display: 'flex', height: 100, width: 350, fontSize: 18}}></input>
-                    <p>Hashtag:</p>
-                    <input name='messageHashtag' value={msgObj.messageHashtag} 
-                    onChange={changeValues} 
-                    style={{display: 'flex', width: 150}}></input>
-                </div>
-               
-                <button onClick={handleCancel}>takaisin</button>
-                <button onClick={postMessage}>Lähetä</button>
-                <button onClick={printObj}>LOG</button>
-                <button onClick={clearValues}>Tyhjennä</button>
+                    <p style={styles.header}>Location:</p>
+                    <select name='messageLocation' value={loc} onChange={(e) => setLoc(e.target.value)} style={styles.select}>
+                        <option value='Helsinki'>Helsinki</option>
+                        <option value='Stockholm'>Stockholm</option>
+                        <option value='Copenhagen'>Copenhage</option>
+                        <option value='Madrid'>Madrid</option>
+                    </select>
+                    <p style={styles.header}>Text:</p>
+                    <input name='messageText' value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    style={styles.text}></input>
+                    <p style={styles.header}>Hashtag:</p>
+                    <input name='messageHashtag' value={ht} 
+                    onChange={(e) => setHt(e.target.value)} 
+                    style={styles.hashtag}></input>
+                    <p style={styles.header}>Color:</p>
+                    <select name='messageColor' value={color} onChange={(e) => setColor(e.target.value)} style={styles.select}>
+                        <option value='#f26d50'>Tomato Red</option>
+                        <option value='#0f8518'>Cucumber Green</option>
+                        <option value='#ffc61c'>Sunrise Yellow</option>
+                        <option value='#3e9cbf'>Skyline Blue</option>
+                        <option value='#f5aa5f'>Chatty Orange</option>
+                    </select>
+                    <div className='palette'>
+                    </div>
+                    <button style={styles.btn} onClick={handleCancel}>takaisin</button>
+                    <button style={styles.btn} onClick={postMessage}>Lähetä</button>
+                    <button style={styles.btn} onClick={printObj}>LOG</button>
+                    <button style={styles.btn} onClick={clearValues}>Tyhjennä</button>
+                </div> 
             </div>
         )
     }

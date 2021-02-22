@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import {IoPeopleOutline} from 'react-icons/io5';
 
 function ListChannels() {
     const [channels, setChannels] = useState([]);
@@ -10,14 +11,44 @@ function ListChannels() {
     }
 
     useEffect(() => {fetchJodels()}, []);
-    console.log(channels);
+    //console.log(channels);
+
+    const styles = {
+        channel: {
+            width: 350,
+            height: 50,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        OuterContainer: {
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            backgroundColor: '#e6e7e8',
+        },
+        InnerContainer: {
+            display: 'flex',
+            border: '1px solid #bbbdbf',
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingLeft: 20,
+            paddingRight: 20,
+            backgroundColor: '#e6e7e8',
+        }
+    }
 
 
     return(
-        <div style={{backgroundColor: 'orange', }}>
+        <div style={styles.OuterContainer}>
             {
                 channels.map((chan) => (
-                    <h1>{chan.channelName}</h1>
+                    <div key={chan.channelId} style={styles.InnerContainer}>
+                        <p style={{fontSize: 32, color: 'grey', display: 'flex'}}>@</p>
+                        <h2 style={styles.channel}>{chan.channelName}</h2>
+                        <IoPeopleOutline style={{fontSize: 30, color: 'grey', display: 'flex'}}/>
+                    </div>
                 ))
             }
         </div>

@@ -6,6 +6,7 @@ import {IoChevronUpOutline, IoChevronDownOutline, IoEllipsisHorizontal, IoLocati
 function ListView() {
     // Array of messages of a selected Channel
     const [messages, setMessages] = useState([]);
+    const [data, setData] = useState([]);
     // Array of channels
     const [channels, setChannels] = useState([]);
     // Holds the current selected Channel, by default "@Main"
@@ -15,6 +16,7 @@ function ListView() {
     // Options panel for message
     const [options, setOptions] = useState(false);
     const [id, setId] = useState(0);
+    const [refresh, toggleRefresh] = useState(0);
 
     async function fetchMessages() {
         const response = await fetch('http://localhost:8080/channelbyname/'+selectedChannel);
@@ -22,6 +24,7 @@ function ListView() {
         setMessages(json.messages);
         setSelectedChannel(json.channelName);
         setChanId(json.channelId);
+        //toggleRefresh(refresh+2);
     }
     
     async function fetchChannels() {
@@ -40,17 +43,6 @@ function ListView() {
                 console.log(err);
             })
     }
-
-   /* const handleUpvote = (msgId) => {
-        console.log("Upvoted message (ID) " + id);
-        axios.put("http://localhost:8080/upvote/" + id, {messageId: id})
-        .then(res => {
-            console.log(res.data);
-        })
-        .catch((err) => {
-            console.log(err);
-        })
-    } */
 
     const handleOptionsOpen = (id) => {
         setOptions(true);
@@ -85,11 +77,37 @@ function ListView() {
                 console.log("Upvote failed");
             }
         })
-        window.location.reload(false);
+        //window.location.reload(false);
+        toggleRefresh(refresh+1);
+    }
+
+    const onDownvote = (id, text, color, ht, loc, likes) => {
+        const msgData = {
+            messageId: id,
+            messageText: text,
+            messageColor: color,
+            messageHashtag: ht,
+            messageLocation: loc,
+            messageLikes: likes-1,
+            messageChannel: {
+                channelId: selChannelId
+            }
+        } 
+        axios.put('http://localhost:8080/upvote', msgData)
+        .then(response => {
+            if (response.status === 200) {
+                console.log("Downvoted message " + id);
+            } else {
+                console.log("Downvote failed");
+            }
+        })
+        //window.location.reload(false);
+        toggleRefresh(refresh-1);
     }
 
     useEffect(() => {fetchMessages()}, [selectedChannel]);
     useEffect(() => {fetchChannels()}, []);
+    useEffect(() => {fetchMessages()}, [refresh])
 
     console.log(channels);
     console.log(messages);
@@ -112,11 +130,10 @@ function ListView() {
 
     return(
         <div style={{display: 'flex', flexDirection: 'column'}}>
-            <div style={{display: 'flex', backgroundColor: 'grey', alignItems: 'center', justifyContent: 'center', padding: 10}}>
-                <div style={{display: 'flex', marginRight: 20}}>
-                    <h1>Channel: </h1>
-                </div>
-                <select onChange={onChannelChange} style={{width: 200, height: 50, fontSize: 24}}>
+            <div style={{display: 'flex', backgroundColor: '#d7d9db', alignItems: 'center', justifyContent: 'center', padding: 10}}>
+                <div style={{display: 'flex', marginRight: 20, backgroundColor: 'orange', alignItems: 'center', justifyContent: 'center', borderRadius: 50, paddingLeft: 30, paddingRight: 30}}>
+                    <h2 style={{margin: 20, color: '#fff'}}>Channel: </h2>
+                <select onChange={onChannelChange} style={{width: 200, height: 40, fontSize: 24, display: 'flex', BackgroundColor: '#fff'}}>
                     {channels.map(chan =>
                        <option 
                        key={chan.channelId} 
@@ -124,6 +141,7 @@ function ListView() {
                        >{chan.channelName}</option> 
                     )}
                 </select>
+                </div>
             </div>
             {
             messages.map((msg) => (
@@ -144,13 +162,14 @@ function ListView() {
                     </div>
                     <div id='rightControls' style={{flex: 1}}>
                         <div id='likes' style={{display: 'flex', flexDirection: 'column'}}>
-                            <IoChevronUpOutline style={{color: "#fff", fontSize: 25}} />
-                            <button 
+                            <IoChevronUpOutline style={{color: "#fff", fontSize: 25}} 
                             onClick={() => 
-                            onUpvote(msg.messageId, msg.messageText, msg.messageColor, msg.messageHashtag, msg.messageLocation, msg.messageLikes)
-                            }>Testi upvote</button>
-                            <p style={{color: "#fff", fontSize: 25}}>{msg.messageLikes}</p>
-                            <IoChevronDownOutline style={{color: "#fff", fontSize: 25}}/>
+                                onUpvote(msg.messageId, msg.messageText, msg.messageColor, msg.messageHashtag, msg.messageLocation, msg.messageLikes)
+                            }/>
+                            <p style={{color: "#fff", fontSize: 25, paddingLeft: 5}}>{msg.messageLikes}</p>
+                            <IoChevronDownOutline style={{color: "#fff", fontSize: 25}}
+                            onClick={() =>
+                            onDownvote(msg.messageId, msg.messageText, msg.messageColor, msg.messageHashtag, msg.messageLocation, msg.messageLikes)}/>
                         </div>
                     </div>
                 </div>

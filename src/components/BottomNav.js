@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import {MdExplore, MdTrackChanges, MdPersonPin} from 'react-icons/md';
+import {MdExplore, MdTrackChanges, MdPersonPin, MdGames} from 'react-icons/md';
 
 import ListView from './ListView';
 import ListChannels from './ListChannels';
+import Animation from './Animation';
 
 function BottomNav() {
     const [selection, setSelection] = useState('feed');
@@ -15,6 +16,9 @@ function BottomNav() {
     }
     const handleOptions = () => {
         setSelection('options');
+    }
+    const handleFun = () => {
+        setSelection('games');
     }
 
     if (selection === 'feed') {
@@ -34,6 +38,10 @@ function BottomNav() {
                 <button style={{width: 150, height: 100, backgroundColor: '#fff', fontSize: 42}}
                 onClick={handleOptions}><MdPersonPin /></button>
             </div>
+            <div className='Games' style={{display: 'flex'}}>
+                <button style={{width: 150, height: 100, backgroundColor: '#fff', fontSize: 42}}
+                onClick={handleFun}><MdGames /></button>
+            </div>
         </div>
     </div>
     )
@@ -41,7 +49,6 @@ function BottomNav() {
     else if (selection === 'channels') {
         return(
         <div className='OuterContainer'>
-            <h1>Channels</h1>
             <ListChannels />
             <div className='NavContainer' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: 'orange'}}>
             <div className='Channels' style={{display: 'flex'}}>
@@ -55,6 +62,10 @@ function BottomNav() {
             <div className='Options' style={{display: 'flex'}}>
                 <button style={{width: 150, height: 100, backgroundColor: '#fff', fontSize: 42}}
                 onClick={handleOptions}><MdPersonPin /></button>
+            </div>
+            <div className='Games' style={{display: 'flex'}}>
+                <button style={{width: 150, height: 100, backgroundColor: '#fff', fontSize: 42}}
+                onClick={handleFun}><MdGames/></button>
             </div>
         </div>
     </div>
@@ -77,8 +88,38 @@ function BottomNav() {
                 <button style={{width: 150, height: 100, backgroundColor: '#fff', fontSize: 42}}
                 onClick={handleOptions}><MdPersonPin /></button>
             </div>
+            <div className='Games' style={{display: 'flex'}}>
+                <button style={{width: 150, height: 100, backgroundColor: '#fff', fontSize: 42}}
+                onClick={handleFun}><MdGames /></button>
+            </div>
         </div>
     </div>
+        )
+    }
+    else if (selection === 'games') {
+        return(
+            <div className='OuterContainer'>
+                <h1>FUN</h1>
+                <Animation />
+                <div className='NavContainer' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: 'orange'}}>
+                <div className='Channels' style={{display: 'flex'}}>
+                    <button style={{width: 150, height: 100, backgroundColor: '#fff', fontSize: 42}}
+                    onClick={handleChannels}><MdTrackChanges /></button>
+                </div>
+                <div className='Feed' style={{display: 'flex'}}>
+                    <button style={{width: 150, height: 100, backgroundColor: '#fff', fontSize: 42}}
+                    onClick={handleFeed}><MdExplore /></button>
+                </div>
+                <div className='Options' style={{display: 'flex'}}>
+                    <button style={{width: 150, height: 100, backgroundColor: '#fff', fontSize: 42}}
+                    onClick={handleOptions}><MdPersonPin /></button>
+                </div>
+                <div className='Games' style={{display: 'flex'}}>
+                    <button style={{width: 150, height: 100, backgroundColor: '#fff', fontSize: 42}}
+                    onClick={handleFun}><MdGames /></button>
+                </div>
+            </div>
+        </div>
         )
     }
 }

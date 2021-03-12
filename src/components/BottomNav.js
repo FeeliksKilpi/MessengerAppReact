@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import {MdExplore, MdTrackChanges, MdPersonPin, MdGames} from 'react-icons/md';
 
-import ListView from './ListView';
+import MainScreen from './MainScreen';
 import ListChannels from './ListChannels';
 import Animation from './Animation';
+import Cards from './Cards';
+import FilterTest from './FilterTest';
 
 function BottomNav() {
     const [selection, setSelection] = useState('feed');
@@ -24,7 +26,7 @@ function BottomNav() {
     if (selection === 'feed') {
     return(
     <div className='OuterContainer'>
-    <ListView />
+    <MainScreen />
         <div className='NavContainer' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: 'orange'}}>
             <div className='Channels' style={{display: 'flex'}}>
                 <button style={{width: 150, height: 100, backgroundColor: '#fff', fontSize: 42}}
@@ -99,8 +101,9 @@ function BottomNav() {
     else if (selection === 'games') {
         return(
             <div className='OuterContainer'>
-                <h1>FUN</h1>
+                <h1>Testing Screen</h1>
                 <Animation />
+                <FilterTest />
                 <div className='NavContainer' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: 'orange'}}>
                 <div className='Channels' style={{display: 'flex'}}>
                     <button style={{width: 150, height: 100, backgroundColor: '#fff', fontSize: 42}}

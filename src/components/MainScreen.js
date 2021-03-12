@@ -1,36 +1,55 @@
 import React from 'react';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
-import {IoChevronUpOutline, IoChevronDownOutline, IoEllipsisHorizontal, IoLocationSharp} from 'react-icons/io5';
+import {IoChevronUpOutline, IoChevronDownOutline, IoEllipsisHorizontal, IoLocationSharp, IoChatbubblesOutline} from 'react-icons/io5';
 
-function ListView() {
+function MainScreen() {
+
     // Array of messages of a selected Channel
     const [messages, setMessages] = useState([]);
-    const [data, setData] = useState([]);
-    // Array of channels
+    // Array that holds channels
     const [channels, setChannels] = useState([]);
+    // Array that holds locations
+    const [locations, setLocations] = useState([]);
+
     // Holds the current selected Channel, by default "@Main"
     const [selectedChannel, setSelectedChannel] = useState('@Main');
     const [selChannelId, setChanId] = useState(1);
-    const [likes, setLikes] = useState(0);
+    const [selectedLoc, setSelectedLoc] = useState('Finland');
+
     // Options panel for message
     const [options, setOptions] = useState(false);
     const [id, setId] = useState(0);
-    const [refresh, toggleRefresh] = useState(0);
 
+  /*  function filterByLocation() {
+        setLocationFilter(
+            messages.filter(msg => msg.messageLocation.location === selectedLoc)
+        );
+    } */
+
+    // Fetch messages by channelname
     async function fetchMessages() {
         const response = await fetch('http://localhost:8080/channelbyname/'+selectedChannel);
         const json = await response.json();
         setMessages(json.messages);
         setSelectedChannel(json.channelName);
         setChanId(json.channelId);
-        //toggleRefresh(refresh+2);
+        console.log("Fetched messages from " + selectedChannel + " and filtered by " + selectedLoc);
     }
-    
+
+    // Fetch Channels
     async function fetchChannels() {
         const response = await fetch('http://localhost:8080/channels');
         const json = await response.json();
         setChannels(json);
+        console.log("fetched Channels");
+    }
+    // Fetch Locations
+    async function fetchLocations() {
+        const response = await fetch('http://localhost:8080/locations');
+        const json = await response.json();
+        setLocations(json);
+        console.log("fetched Locations");
     } 
 
     const postDelete = (msgId) => {
@@ -56,6 +75,9 @@ function ListView() {
     const onChannelChange = (e) => {
         setSelectedChannel(e.target.value);
     }
+    const onLocationChange = (e) => {
+        setSelectedLoc(e.target.value);  
+    }
 
     const onUpvote = (id, text, color, ht, loc, likes) => {
         const msgData = {
@@ -63,12 +85,14 @@ function ListView() {
             messageText: text,
             messageColor: color,
             messageHashtag: ht,
-            messageLocation: loc,
+            messageLocation: {
+                locationId: loc
+            },
             messageLikes: likes+1,
             messageChannel: {
                 channelId: selChannelId
             }
-        } 
+        }
         axios.put('http://localhost:8080/upvote', msgData)
         .then(response => {
             if (response.status === 200) {
@@ -77,8 +101,6 @@ function ListView() {
                 console.log("Upvote failed");
             }
         })
-        //window.location.reload(false);
-        toggleRefresh(refresh+1);
     }
 
     const onDownvote = (id, text, color, ht, loc, likes) => {
@@ -87,12 +109,14 @@ function ListView() {
             messageText: text,
             messageColor: color,
             messageHashtag: ht,
-            messageLocation: loc,
+            messageLocation: {
+                locationId: loc
+            },
             messageLikes: likes-1,
             messageChannel: {
                 channelId: selChannelId
             }
-        } 
+        }
         axios.put('http://localhost:8080/upvote', msgData)
         .then(response => {
             if (response.status === 200) {
@@ -101,17 +125,12 @@ function ListView() {
                 console.log("Downvote failed");
             }
         })
-        //window.location.reload(false);
-        toggleRefresh(refresh-1);
     }
 
-    useEffect(() => {fetchMessages()}, [selectedChannel]);
+    useEffect(() => {fetchMessages()}, [selectedChannel, selectedLoc]);
     useEffect(() => {fetchChannels()}, []);
-    useEffect(() => {fetchMessages()}, [refresh])
+    useEffect(() => {fetchLocations()}, []);
 
-    console.log(channels);
-    console.log(messages);
-    console.log("Channel chosen: " + selectedChannel);
     
     if (options === true) {
         return(
@@ -127,12 +146,11 @@ function ListView() {
             </div>
         )
     }
-
     return(
         <div style={{display: 'flex', flexDirection: 'column'}}>
             <div style={{display: 'flex', backgroundColor: '#d7d9db', alignItems: 'center', justifyContent: 'center', padding: 10}}>
                 <div style={{display: 'flex', marginRight: 20, backgroundColor: 'orange', alignItems: 'center', justifyContent: 'center', borderRadius: 50, paddingLeft: 30, paddingRight: 30}}>
-                    <h2 style={{margin: 20, color: '#fff'}}>Channel: </h2>
+                    <IoChatbubblesOutline style={{fontSize: 28, color: '#fff', margin: 10}} />
                 <select onChange={onChannelChange} style={{width: 200, height: 40, fontSize: 24, display: 'flex', BackgroundColor: '#fff'}}>
                     {channels.map(chan =>
                        <option 
@@ -142,14 +160,25 @@ function ListView() {
                     )}
                 </select>
                 </div>
+                <div style={{display: 'flex', marginRight: 20, backgroundColor: 'orange', alignItems: 'center', justifyContent: 'center', borderRadius: 50, paddingLeft: 30, paddingRight: 30}}>
+                    <IoLocationSharp style={{fontSize: 28, color: "#fff", margin: 10}}/>
+                        <select style={{display: 'flex', backgroundColor: '#fff', height: 40, width: 200, padding: 15, fontSize: 20}} onChange={onLocationChange}>
+                                {
+                                    locations.map((loc) => (
+                                        <option key={loc.locationId}>{loc.location}</option>
+                                    ))
+                                }
+                                <option value="" selected disabled hidden>Choose Location</option>
+                        </select>
+                </div>
             </div>
-            {
-            messages.map((msg) => (
+            { 
+            messages.filter(msg => msg.messageLocation.location === selectedLoc).map((msg) => (
             <div key={msg.messageId} style={{backgroundColor: msg.messageColor}}>
             <div id='jodelContainer' style={{margin: 10}}>
                 <div id='topBar' style={{display: 'flex', flexDirection: 'row'}}>
                     <IoLocationSharp style={{color: "#fff", fontSize: 20, marginTop: 10, opacity: 0.7}}/>
-                    <p style={{color: "#fff", fontSize: 14, marginTop: 10, marginRight: 15, opacity: 0.7}}>{msg.messageLocation}</p>
+                    <p style={{color: "#fff", fontSize: 14, marginTop: 10, marginRight: 15, opacity: 0.7}}>{msg.messageLocation.location}</p>
                     <p style={{color: "#fff", fontSize: 14, marginRight: 10}}><b>{selectedChannel}</b></p>
                     <p style={{color: "#fff", fontSize: 14, opacity: 0.7}}>0s</p>
                 </div>
@@ -164,12 +193,12 @@ function ListView() {
                         <div id='likes' style={{display: 'flex', flexDirection: 'column'}}>
                             <IoChevronUpOutline style={{color: "#fff", fontSize: 25}} 
                             onClick={() => 
-                                onUpvote(msg.messageId, msg.messageText, msg.messageColor, msg.messageHashtag, msg.messageLocation, msg.messageLikes)
+                                onUpvote(msg.messageId, msg.messageText, msg.messageColor, msg.messageHashtag, msg.messageLocation.locationId, msg.messageLikes)
                             }/>
                             <p style={{color: "#fff", fontSize: 25, paddingLeft: 5}}>{msg.messageLikes}</p>
                             <IoChevronDownOutline style={{color: "#fff", fontSize: 25}}
                             onClick={() =>
-                            onDownvote(msg.messageId, msg.messageText, msg.messageColor, msg.messageHashtag, msg.messageLocation, msg.messageLikes)}/>
+                            onDownvote(msg.messageId, msg.messageText, msg.messageColor, msg.messageHashtag, msg.messageLocation.locationId, msg.messageLikes)}/>
                         </div>
                     </div>
                 </div>
@@ -185,4 +214,4 @@ function ListView() {
     )
 }
 
-export default ListView;
+export default MainScreen;

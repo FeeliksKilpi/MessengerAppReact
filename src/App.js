@@ -1,14 +1,11 @@
 import React from 'react';
-import ListView from './components/ListView';
 import PublishBtn from './components/PublishBtn';
 import BottomNav from './components/BottomNav';
-import TopBar from './components/TopBar';
 
 function App() {
   return (
     <div className="App">
-      <h1>Messaging App</h1>
-      <TopBar />
+      <h1 style={{textAlign: 'center'}}>Felipe's Messaging Client</h1>
       <BottomNav />
       <PublishBtn />
     </div>

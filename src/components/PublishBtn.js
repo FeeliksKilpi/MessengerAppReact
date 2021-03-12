@@ -3,18 +3,25 @@ import React, { useState, useEffect } from 'react';
 function PublishBtn() {
     const [write, setWrite] = useState(false);
     const [channels, setChannels] = useState([]);
+    const [locations, setLocations] = useState([]);
 
     // Message Object proterties
-    const [selChannelId, setChanId] = useState(1);
+    const [selChannelId, setChanId] = useState(6);
     const [text, setText] = useState('');
     const [ht, setHt] = useState('#');
-    const [loc, setLoc] = useState('Helsinki');
+    const [loc, setLoc] = useState('1');
     const [color, setColor] = useState('#f26d50');
 
     async function fetchChannels() {
         const response = await fetch('http://localhost:8080/channels');
         const json = await response.json();
         setChannels(json);
+    }
+
+    async function getLocations() {
+        const response = await fetch('http://localhost:8080/locations');
+        const json = await response.json();
+        setLocations(json);
     }
     
     const handleWrite = () => {
@@ -25,7 +32,18 @@ function PublishBtn() {
     }
 
     const printObj = () => {
-        console.log(loc, text, ht, selChannelId, color);
+        console.log({
+            'messageText': text,
+            'messageColor': color,
+            'messageHashtag': ht,
+            'messageLocation': {
+                'locationId': loc,
+            },
+            'messageLikes': 0,
+            'messageChannel': {
+                'channelId': selChannelId
+            }
+        });
     }
 
     const createMsgObj = () => {
@@ -33,7 +51,9 @@ function PublishBtn() {
             'messageText': text,
             'messageColor': color,
             'messageHashtag': ht,
-            'messageLocation': loc,
+            'messageLocation': {
+                'locationId': loc,
+            },
             'messageLikes': 0,
             'messageChannel': {
                 'channelId': selChannelId
@@ -60,6 +80,7 @@ function PublishBtn() {
         console.log("Message posted!");
     }
 
+    useEffect(() => {getLocations()}, []);
     useEffect(() => {fetchChannels()}, []);
 
     const styles = 
@@ -116,10 +137,11 @@ function PublishBtn() {
                     </select>
                     <p style={styles.header}>Location:</p>
                     <select name='messageLocation' value={loc} onChange={(e) => setLoc(e.target.value)} style={styles.select}>
-                        <option value='Helsinki'>Helsinki</option>
-                        <option value='Stockholm'>Stockholm</option>
-                        <option value='Copenhagen'>Copenhage</option>
-                        <option value='Madrid'>Madrid</option>
+                    {
+                        locations.map((loc) => (
+                            <option key={loc.locationId} value={loc.locationId}>{loc.location}</option>
+                        ))
+                    }
                     </select>
                     <p style={styles.header}>Text:</p>
                     <input name='messageText' value={text}
